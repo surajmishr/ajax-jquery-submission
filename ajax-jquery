@@ -1,0 +1,70 @@
+
+        function submitAddUpdateImport() {
+            if ($("#addUpdateForm").valid()) {
+                // Update tinymcefield values
+                $('.tinymcefield').each(function() {
+                    $(this).val(tinyMCE.editors[$(this).attr('id')].getContent());
+                });
+
+                var action = $('#addUpdateForm').attr('action');
+                var myForm = document.getElementById('addUpdateForm');
+                var formData = new FormData(myForm);
+
+                $.ajax({
+                    method: "POST",
+                    url: action,
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    error: function(xhr, status) {
+                        if (xhr.status == 500) {
+                            $.notify('Something went wrong.', {
+                                autoHideDelay: 4000,
+                                className: "error"
+                            });
+                        }
+                    }
+                }).done(function(response) {
+                    console.log("Form Data Before Ajax Request:", response);
+
+                    // Assuming the response is in JSON format
+                    // Parse the response as JSON
+                    // var msg = JSON.parse(response);
+
+                    if (response.status === 'success') {
+                        // Append success message to the container with the success-message class
+                        $("#success-message-container").append('<div class="success-message">Success</div>');
+                        resetData();
+
+                        // Set a timeout to a utomatically hide the success message after 4000 milliseconds (4 seconds)
+                        setTimeout(function() {
+                            $(".success-message").fadeOut("slow", function() {
+                                $(this).remove(); // Remove the element after fading out
+                            });
+                        }, 4000);
+
+                        // Redirect to another page if needed
+                        // window.location.href = 'importmaster';
+                    } else {
+                        // Display error message from flash data
+                        $.notify(response.error, {
+                            autoHideDelay: 4000,
+                            className: "error"
+                        });
+                    }
+
+                });
+            }
+        }
+
+        function resetData() {
+            // Assuming you have a form with an ID "myForm"
+            $('#addUpdateForm')[0].reset();
+
+            // You can also clear specific input fields individually
+            // $('#inputField1').val('');
+            // $('#inputField2').val('');
+            // ...
+
+            // Additional actions you might need to reset other elements or variables
+        }
